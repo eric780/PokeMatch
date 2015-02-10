@@ -63,8 +63,9 @@ class Level{
             return false
         }
         else{
-            var path = doBFS(t1, t2: t2)
+            var path = doSearch(t1, t2: t2)
             println(path)
+            println(path.numberOfTurns())
         
             var matched = matchable(t1, t2) && (path.last.0 == t2.column) && (path.last.1 == t2.row)
             
@@ -101,47 +102,48 @@ class Level{
     
     
     //returns a shortest list of tiles that will lead from t1 to t2
-    private func doBFS(t1: Tile, t2: Tile) -> Path{
+    //precondition: t2 is reachable from t1
+    private func doSearch(t1: Tile, t2: Tile) -> Path{
         var visitedTiles = Set<Tile>()
         visitedTiles.addElement(t1)
+        var distances:[Tile: Int]
         var path = Path()
         path.add(t1.column, row: t1.row)
         var currentTile = t1
-        //while current tile not t2
-            //generate neighbors for current tile in an order, depending which direction t2 is from currentTile
-            //iterate through the neighbors and check which is not an obstacle
-                //set currentTile to that
-                //add that to path
+        
         while (currentTile != t2){
             let neighbors = getNeighbors(currentTile, goal: t2)
             println("neighbors for \(currentTile) are \(neighbors)")
             var chosenTile:Tile = neighbors[0]
             for tile in neighbors{
-                //TODO: iterate through neighbors and take the path that gives the lowest distance
                 if ((tile.pokemon == .None) || (tile == t2))
-                    && (distance(tile, t2:t2) < distance(chosenTile, t2:t2)) && (!visitedTiles.containsElement(tile)){
+                    && (distance(tile, t2:t2) <= distance(chosenTile, t2:t2)) && (!visitedTiles.containsElement(tile)){
                         chosenTile = tile
-                        
                 }
             }
             currentTile = chosenTile
             path.add(chosenTile.column, row:chosenTile.row)
             visitedTiles.addElement(currentTile)
+            
+            if path.numberOfTurns() > 2{ //return incomplete path
+                return path
+                //TODO: FIX NUMBER OF PATH TURNS
+            }
         }
         
         return path
     }
     
-    //returns a heuristical distance between two tiles
+    
+    //returns the Manhattan distance between two tiles
     private func distance(t1:Tile, t2:Tile) -> Float{
-        let side1 = Float((t2.column - t1.column))
-        let side2 = Float((t2.row - t1.row))
+        let side1 = Float(t2.column - t1.column)
+        let side2 = Float(t2.row - t1.row)
 
-        return sqrt(pow(side1, 2) + pow(side2, 2))
+        return sqrtf(pow(side1, 2) + pow(side2, 2))
     }
     
-    //returns a list of neighboring tiles in direction-based order
-    //for a given coordinate
+    //returns a list of neighboring tiles
     private func getNeighbors(tile: Tile, goal: Tile) -> Array<Tile>{
         let (col,row) = (tile.column, tile.row)
         var arr = Array<Tile>()
@@ -158,130 +160,6 @@ class Level{
             arr.append(tiles[col, row+1]!)
         }
         return arr
-        /*let (col,row) = (tile.column, tile.row)
-        println("getting neighbors for \(col),\(row)")
-        
-        let (goalcol, goalrow) = (goal.column, goal.row)
-        println("goal is \(goalcol), \(goalrow)")
-        
-        let diff_x = goalcol - col
-        let diff_y = goalrow - row
-        var arr = Array<Tile>()
-        
-        if abs(diff_x) > abs(diff_y){
-            if diff_x >= 0{
-                if col < NumColumns-1{
-                    arr.append(tiles[col+1,row]!)
-                }
-                if diff_y >= 0{
-                    if(row < NumRows-1){
-                        arr.append(tiles[col, row+1]!)
-                    }
-                    if col > 0{
-                        arr.append(tiles[col-1, row]!)
-                    }
-                    if row > 0{
-                        arr.append(tiles[col, row-1]!)
-                    }
-                }
-                else{
-                    if(row > 0){
-                        arr.append(tiles[col, row-1]!)
-                    }
-                    if col > 0{
-                        arr.append(tiles[col-1, row]!)
-                    }
-                    if row < NumRows-1{
-                        arr.append(tiles[col, row+1]!)
-                    }
-                }
-            }
-            else{//diff_x < 0
-                if col > 0{
-                    arr.append(tiles[col-1,row]!)
-                }
-                if diff_y > 0{
-                    if row < NumRows-1{
-                        arr.append(tiles[col, row+1]!)
-                    }
-                    if col < NumColumns-1{
-                        arr.append(tiles[col+1, row]!)
-                    }
-                    if row > 0{
-                        arr.append(tiles[col, row-1]!)
-                    }
-                }
-                else{
-                    if row > 0{
-                        arr.append(tiles[col, row-1]!)
-                    }
-                    if col < NumColumns-1{
-                        arr.append(tiles[col+1, row]!)
-                    }
-                    if row < NumRows-1{
-                        arr.append(tiles[col, row+1]!)
-                    }
-                }
-            }
-            
-        }
-        else{
-            if diff_y > 0{
-                if row < NumRows-1{
-                    arr.append(tiles[col,row+1]!)
-                }
-                if diff_x > 0{
-                    arr.append(tiles[col+1, row]!)
-                    if col > 0{
-                        arr.append(tiles[col-1, row]!)
-                    }
-                    if row > 0{
-                        arr.append(tiles[col, row-1]!)
-                    }
-                }
-                else{
-                    if col > 0{
-                        arr.append(tiles[col-1, row]!)
-                    }
-                    if col < NumColumns-1{
-                        arr.append(tiles[col+1, row]!)
-                    }
-                    if row > 0{
-                        arr.append(tiles[col, row-1]!)
-                    }
-                }
-            }
-            else{//diff_y < 0
-                if row > 0{
-                    arr.append(tiles[col,row-1]!)
-                }
-                if diff_x > 0{
-                    if(col < NumColumns-1){
-                        arr.append(tiles[col+1, row]!)
-                    }
-                    if col > 0{
-                        arr.append(tiles[col-1, row]!)
-                    }
-                    if row < NumRows-1{
-                        arr.append(tiles[col, row+1]!)
-                    }
-                }
-                else{
-                    if col > 0{
-                        arr.append(tiles[col-1, row]!)
-                    }
-                    if col < NumColumns-1{
-                        arr.append(tiles[col+1, row]!)
-                    }
-                    if row < NumRows-1{
-                        arr.append(tiles[col, row+1]!)
-                    }
-                }
-            }
-            
-        }
-        
-        return arr*/
     }
     
     private func printTileArray(array: Array2D<Tile>){
