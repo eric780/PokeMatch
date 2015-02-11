@@ -9,6 +9,19 @@
 import Foundation
 import SpriteKit
 
+class Node{
+    var column:Int;
+    var row:Int;
+    
+    var cost:Int = 0;
+    
+    init(column:Int, row:Int){
+        self.column = column;
+        self.row = row;
+    }
+    
+}
+
 class Path: Printable{
     var tileSequence: Array<(Int, Int)>
     var length:Int = 0;

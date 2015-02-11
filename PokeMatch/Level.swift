@@ -110,6 +110,7 @@ class Level{
         var path = Path()
         path.add(t1.column, row: t1.row)
         var currentTile = t1
+        //TODO: LINE OF SIGHT??
         
         while (currentTile != t2){
             let neighbors = getNeighbors(currentTile, goal: t2)
@@ -127,7 +128,6 @@ class Level{
             
             if path.numberOfTurns() > 2{ //return incomplete path
                 return path
-                //TODO: FIX NUMBER OF PATH TURNS
             }
         }
         
