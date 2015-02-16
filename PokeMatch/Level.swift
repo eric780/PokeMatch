@@ -104,13 +104,14 @@ class Level{
     //returns a shortest list of tiles that will lead from t1 to t2
     //precondition: t2 is reachable from t1
     private func doSearch(t1: Tile, t2: Tile) -> Path{
-        var visitedTiles = Set<Tile>()
-        visitedTiles.addElement(t1)
-        var distances:[Tile: Int]
+        var closedset = Set<Tile>()
+        var openset = Set<Tile>()
+        openset.addElement(t1)
+        
+        
         var path = Path()
         path.add(t1.column, row: t1.row)
         var currentTile = t1
-        //TODO: LINE OF SIGHT??
         
         while (currentTile != t2){
             let neighbors = getNeighbors(currentTile, goal: t2)
@@ -118,13 +119,13 @@ class Level{
             var chosenTile:Tile = neighbors[0]
             for tile in neighbors{
                 if ((tile.pokemon == .None) || (tile == t2))
-                    && (distance(tile, t2:t2) <= distance(chosenTile, t2:t2)) && (!visitedTiles.containsElement(tile)){
+                    && (distance(tile, t2:t2) <= distance(chosenTile, t2:t2)) && (!closedset.containsElement(tile)){
                         chosenTile = tile
                 }
             }
             currentTile = chosenTile
             path.add(chosenTile.column, row:chosenTile.row)
-            visitedTiles.addElement(currentTile)
+            closedset.addElement(currentTile)
             
             if path.numberOfTurns() > 2{ //return incomplete path
                 return path
@@ -135,12 +136,16 @@ class Level{
     }
     
     
-    //returns the Manhattan distance between two tiles
-    private func distance(t1:Tile, t2:Tile) -> Float{
+    //returns the Manhattan distance between two tiles (H)
+    private func distance(t1:Tile, t2:Tile) -> Int{
         let side1 = Float(t2.column - t1.column)
         let side2 = Float(t2.row - t1.row)
 
-        return sqrtf(pow(side1, 2) + pow(side2, 2))
+        return Int(sqrtf(pow(side1, 2) + pow(side2, 2)))
+    }
+    //returns the movement cost (G) for a path
+    private func movementCost(path:Path) -> Int{
+        return path.length + 2*path.numberOfTurns()
     }
     
     //returns a list of neighboring tiles

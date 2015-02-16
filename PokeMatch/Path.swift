@@ -23,24 +23,40 @@ class Node{
 }
 
 class Path: Printable{
-    var tileSequence: Array<(Int, Int)>
+    var tileSequence: Array<Node>
     var length:Int = 0;
     
     init(){
-        tileSequence = Array<(Int, Int)>()
+        tileSequence = Array<Node>()
     }
     
     var description:String{
         var s: String = ""
-        for (x,y) in tileSequence{
-            s += "(\(x), \(y))"
+        for n in tileSequence{
+            s += "(\(n.column), \(n.row))"
         }
         return s
     }
     
     func add (column:Int, row:Int){
-        tileSequence += [(column,row)]
+        var node = Node(column:column, row:row)
+        tileSequence += [node]
         length++
+    }
+    
+    func removeLast(){
+        tileSequence.removeAtIndex(tileSequence.count-1)
+    }
+    
+    func potentialNumberOfTurns(column:Int, row:Int) -> Int{
+        add(column, row:row)
+        let ret = numberOfTurns()
+        removeLast()
+        return ret
+    }
+    
+    func wouldIncreaseTurns(column:Int, row:Int) -> Bool{
+        return numberOfTurns() < potentialNumberOfTurns(column, row:row)
     }
     
     func numberOfTurns() -> Int{
@@ -48,8 +64,8 @@ class Path: Printable{
         var horizontal = -1 //1 for horizontal movement, 0 for vertical, -1 for no direction yet
         
         for i in 1..<length{
-            let (oldx,oldy) = tileSequence[i-1]
-            let (x,y) = tileSequence[i]
+            let (oldx,oldy) = (tileSequence[i-1].column, tileSequence[i-1].row)
+            let (x,y) = (tileSequence[i].column, tileSequence[i].row)
             if (x - oldx != 0){//horizontal movement
                 if (horizontal == 0){
                     numTurns++
@@ -68,7 +84,7 @@ class Path: Printable{
         return numTurns
     }
     
-    var last:(Int, Int){
+    var last:Node{
         return tileSequence[tileSequence.count-1]
     }
 }
