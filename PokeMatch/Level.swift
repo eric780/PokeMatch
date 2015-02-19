@@ -112,7 +112,7 @@ class Level{
         
         bfsqueue.enQueue(initialpath)
         
-        while !bfsqueue.isEmpty(){p
+        while !bfsqueue.isEmpty(){
             let path = bfsqueue.deQueue()!
             //if the path has too many turns, we don't want it anymore
             //TODO: find more of these "discard" conditions to speed up BFS
