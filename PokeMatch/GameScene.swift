@@ -12,8 +12,8 @@ import UIKit
 class GameScene: SKScene {
     var level: Level!
     
-    let TileWidth: CGFloat = 22.0
-    let TileHeight: CGFloat = 24.0
+    let TileWidth: CGFloat = 34.0
+    let TileHeight: CGFloat = 34.0
     
     let gameLayer = SKNode()
     let tileLayer = SKNode()
@@ -77,6 +77,32 @@ class GameScene: SKScene {
         return nil
     }
     
+    func drawPath(path:Path){
+        //TODO
+        var pathpoints = CGPathCreateMutable()
+        for (var i=0; i<path.length; i++){
+            let node = path.tileSequence[i]
+            let point:CGPoint = pointForColumn(node.column, row:node.row)
+            if(i==0){
+                CGPathMoveToPoint(pathpoints, nil, point.x, point.y)
+            }
+            else{
+                CGPathAddLineToPoint(pathpoints, nil, point.x, point.y)
+            }
+        }
+
+        let shapepath = SKShapeNode()
+        shapepath.path = pathpoints
+        shapepath.strokeColor = UIColor.whiteColor()
+        shapepath.lineWidth = 1.5
+        tileLayer.addChild(shapepath)
+        
+        delay(1.0){
+            shapepath.removeFromParent()
+        }
+        
+    }
+    
     func handleDeselectedTile(tile: Tile) -> Bool{//returns true if tile is deselected
         let (selectedOne, selectedTwo) = selectedTiles
         if tile == selectedOne{
@@ -133,12 +159,14 @@ class GameScene: SKScene {
                         sprite.colorBlendFactor = 0.5
                         
                         if twoTilesSelected(){
-                            if level.tilesAreMatched(selectedTiles.0!, t2: selectedTiles.1!){
-                                //TODO:remove those tiles graphically
+                            let (tilesMatch, path) = level.tilesAreMatched(selectedTiles.0!, t2:selectedTiles.1!)
+                            if tilesMatch{
                                 (selectedTiles.0!).sprite!.removeFromParent()
                                 (selectedTiles.1!).sprite!.removeFromParent()
                                 
                                 selectedTiles = (nil, nil)
+                                
+                                drawPath(path!)
                                 
                             }
                         }
@@ -149,6 +177,21 @@ class GameScene: SKScene {
             }
         }
         
+    }
+    
+    /*Example Usage:
+    *delay(0.4){
+    *   dosomething()
+    *}
+    *Will delay for 0.4 seconds
+    */
+    func delay(delay:Double, closure:()->()) {
+        dispatch_after(
+            dispatch_time(
+                DISPATCH_TIME_NOW,
+                Int64(delay * Double(NSEC_PER_SEC))
+            ),
+            dispatch_get_main_queue(), closure)
     }
     
 }

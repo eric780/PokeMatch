@@ -8,38 +8,66 @@
 
 import Foundation
 
-struct Queue<T>{
-    private var array = Array<T>()
+class QNode<T>{
+    var value:T? = nil
+    var next:QNode? = nil
+}
+
+public class Queue<T>{
+    private var top:QNode<T>! = QNode<T>()
     
-    mutating func enqueue(element: T){
-        array.append(element)
+    func enQueue(var element:T){
+        if(top == nil){
+            top = QNode()
+        }
+        if(top.value == nil){
+            top.value = element
+        }
+        else{
+        
+            var childToUse:QNode<T> = QNode<T>()
+            var current:QNode = top
+        
+            while(current.next != nil){
+                current = current.next!
+            }
+        
+            //append
+            childToUse.value = element
+            current.next = childToUse
+        }
     }
     
-    //returns head of array, then shifts all elements up by 1
-    mutating func dequeue() -> T{
-        assert(array.count > 0)
-        var h = array.removeAtIndex(0)
-        
-        for(var i=1; i<array.count; i++){
-            array[i-1] = array[i]
+    func deQueue() -> T?{
+        let topitem:T? = self.top?.value
+        if(topitem == nil){
+            return nil
         }
         
-        return h
+        var queueitem:T? = top.value!
+        
+        //set top to next if exists, otherwise queue has been emptied
+        if let nextitem = top.next{
+            top = nextitem
+        }
+        else{
+            top = nil
+        }
+        
+        return queueitem
+        
     }
     
-    
-    func peek() -> T{
-        assert(array.count > 0)
-        return array[0]
+    func isEmpty() -> Bool{
+        if let topitem:T = self.top?.value{
+            return false
+        }
+        else{
+            return true
+        }
     }
     
-    var count:Int{
-        return array.count
+    func peek() -> T?{
+        return top.value!
     }
-    
-    func empty() -> Bool{
-        return (array.count == 0)
-    }
-    
-    
 }

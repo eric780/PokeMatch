@@ -9,12 +9,12 @@
 import Foundation
 import SpriteKit
 
-let NumberOfPokemonTypes:UInt32 = 3
+let NumberOfPokemonTypes:UInt32 = 15
 
 enum PokemonType:Int{
     //last case must be None, and not included in NumberOfPokemonTypes
     
-    case Bulbasaur = 0, Squirtle, Charmander, Caterpie, Pidgey, None
+    case Bulbasaur = 0, Squirtle, Charmander, Ditto, Caterpie, Koffing, Abra, Poliwag, Growlithe, Paras, Psyduck, Geodude, Jigglypuff, Grimer, Slowpoke, None
     
     var spriteName:String{
         switch self{
@@ -24,10 +24,30 @@ enum PokemonType:Int{
             return "squirtle"
         case .Charmander:
             return "charmander"
+        case .Ditto:
+            return "ditto"
         case .Caterpie:
             return "caterpie"
-        case .Pidgey:
-            return "pidgey"
+        case .Koffing:
+            return "koffing"
+        case .Abra:
+            return "abra"
+        case .Poliwag:
+            return "poliwag"
+        case .Growlithe:
+            return "growlithe"
+        case .Paras:
+            return "paras"
+        case .Psyduck:
+            return "psyduck"
+        case .Geodude:
+            return "geodude"
+        case .Jigglypuff:
+            return "jigglypuff"
+        case .Grimer:
+            return "grimer"
+        case .Slowpoke:
+            return "slowpoke"
         case .None:
             return "none"
         }

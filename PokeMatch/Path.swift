@@ -13,8 +13,6 @@ class Node{
     var column:Int;
     var row:Int;
     
-    var cost:Int = 0;
-    
     init(column:Int, row:Int){
         self.column = column;
         self.row = row;
@@ -22,7 +20,7 @@ class Node{
     
 }
 
-class Path: Printable{
+struct Path: Printable{
     var tileSequence: Array<Node>
     var length:Int = 0;
     
@@ -38,25 +36,34 @@ class Path: Printable{
         return s
     }
     
-    func add (column:Int, row:Int){
+    mutating func add (column:Int, row:Int){
         var node = Node(column:column, row:row)
         tileSequence += [node]
         length++
     }
     
-    func removeLast(){
+    mutating func removeLast(){
         tileSequence.removeAtIndex(tileSequence.count-1)
     }
     
-    func potentialNumberOfTurns(column:Int, row:Int) -> Int{
+    mutating func potentialNumberOfTurns(column:Int, row:Int) -> Int{
         add(column, row:row)
         let ret = numberOfTurns()
         removeLast()
         return ret
     }
     
-    func wouldIncreaseTurns(column:Int, row:Int) -> Bool{
+    mutating func wouldIncreaseTurns(column:Int, row:Int) -> Bool{
         return numberOfTurns() < potentialNumberOfTurns(column, row:row)
+    }
+    
+    func containsCoords(column:Int, row:Int) -> Bool{
+        for node in tileSequence{
+            if (node.column == column) && (node.row == row){
+                return true
+            }
+        }
+        return false
     }
     
     func numberOfTurns() -> Int{

@@ -56,34 +56,36 @@ class Level{
     
     //function returns true if two tiles can be matched and removed.
     //also removes those tiles from the tile array before returning
-    func tilesAreMatched(t1: Tile, t2: Tile) -> Bool{
+    func tilesAreMatched(t1: Tile, t2: Tile) -> (Bool, Path?){
         println("checking tile \(t1) and tile \(t2)")
         
         if tileIsUnreachable(t1, t2:t2){
-            return false
+            return (false, nil)
         }
         else{
-            var path = doSearch(t1, t2: t2)
-            println(path)
-            println(path.numberOfTurns())
-        
-            var matched = matchable(t1, t2) && (path.last.0 == t2.column) && (path.last.1 == t2.row)
-            
-            if(matched){
-                //set t1 and t2 to type None
-                t1.setPokemonTypeToNone()
-                t2.setPokemonTypeToNone()
-                return true
+            if(matchable(t1, t2)){//don't do search if the tiles are different pokemon
+                var path = doBFS(t1, t2: t2)
+                println(path)
+                println(path.numberOfTurns())
+                
+                var ended = (path.last.column == t2.column) && (path.last.row == t2.row)
+                
+                if(ended){
+                    //set t1 and t2 to type None
+                    t1.setPokemonTypeToNone()
+                    t2.setPokemonTypeToNone()
+                    return (true, path)
+                }
             }
         }
-        return false
+        return (false, nil)
         
     }
     
     //returns true if t2 is unreachable from t1
     //happens when t2 is surrounded on 4 sides by tiles, none of which are t1
     private func tileIsUnreachable(t1: Tile, t2: Tile) -> Bool{
-        let neighbors = getNeighbors(t2, goal:t1) //arbitrarily get all neighbors of t2
+        let neighbors = getNeighbors(t2) //arbitrarily get all neighbors of t2
         var noneTileCount = 0
         for tile in neighbors{
             if tile == t1{
@@ -99,40 +101,42 @@ class Level{
         return true
     }
     
+    private func doDFS(t1: Tile, t2: Tile) -> Path{
+        
+    }
     
     
     //returns a shortest list of tiles that will lead from t1 to t2
     //precondition: t2 is reachable from t1
-    private func doSearch(t1: Tile, t2: Tile) -> Path{
-        var closedset = Set<Tile>()
-        var openset = Set<Tile>()
-        openset.addElement(t1)
+    private func doBFS(t1: Tile, t2: Tile) -> Path{
+        var bfsqueue = Queue<Path>()
         
+        var initialpath = Path()
+        initialpath.add(t1.column, row: t1.row)
         
-        var path = Path()
-        path.add(t1.column, row: t1.row)
-        var currentTile = t1
+        bfsqueue.enQueue(initialpath)
         
-        while (currentTile != t2){
-            let neighbors = getNeighbors(currentTile, goal: t2)
-            println("neighbors for \(currentTile) are \(neighbors)")
-            var chosenTile:Tile = neighbors[0]
-            for tile in neighbors{
-                if ((tile.pokemon == .None) || (tile == t2))
-                    && (distance(tile, t2:t2) <= distance(chosenTile, t2:t2)) && (!closedset.containsElement(tile)){
-                        chosenTile = tile
-                }
-            }
-            currentTile = chosenTile
-            path.add(chosenTile.column, row:chosenTile.row)
-            closedset.addElement(currentTile)
+        while !bfsqueue.isEmpty(){
+            let path = bfsqueue.deQueue()!
             
-            if path.numberOfTurns() > 2{ //return incomplete path
+            let node = path.last
+            if (node.column == t2.column && node.row == t2.row) && path.numberOfTurns() < 3{
                 return path
             }
+            let tile = tiles[node.column, node.row]!
+            for neighbor in getNeighbors(tile){
+                if !path.containsCoords(neighbor.column, row: neighbor.row) &&
+                    ((neighbor.pokemon == .None) || (neighbor == t2)){
+                    var newpath = path
+                    newpath.add(neighbor.column, row:neighbor.row)
+                    println(newpath)
+                    bfsqueue.enQueue(newpath)
+                    
+                    //TODO: improve efficiency..
+                }
+            }
         }
-        
-        return path
+        return initialpath //should not be reached
     }
     
     
@@ -149,7 +153,7 @@ class Level{
     }
     
     //returns a list of neighboring tiles
-    private func getNeighbors(tile: Tile, goal: Tile) -> Array<Tile>{
+    private func getNeighbors(tile: Tile) -> Array<Tile>{
         let (col,row) = (tile.column, tile.row)
         var arr = Array<Tile>()
         if col > 0{
