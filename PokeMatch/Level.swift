@@ -101,10 +101,6 @@ class Level{
         return true
     }
     
-    private func doDFS(t1: Tile, t2: Tile) -> Path{
-        
-    }
-    
     
     //returns a shortest list of tiles that will lead from t1 to t2
     //precondition: t2 is reachable from t1
@@ -116,8 +112,13 @@ class Level{
         
         bfsqueue.enQueue(initialpath)
         
-        while !bfsqueue.isEmpty(){
+        while !bfsqueue.isEmpty(){p
             let path = bfsqueue.deQueue()!
+            //if the path has too many turns, we don't want it anymore
+            //TODO: find more of these "discard" conditions to speed up BFS
+            if(path.numberOfTurns() > 2){
+                continue
+            }
             
             let node = path.last
             if (node.column == t2.column && node.row == t2.row) && path.numberOfTurns() < 3{
