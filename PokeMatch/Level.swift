@@ -9,7 +9,8 @@
 import Foundation
 
 let NumColumns = 17
-let NumRows = 9
+let NumRows = 10
+let NumPokemonTiles:Int = (NumColumns-2)*(NumRows-2)
 
 class Level{
     private var tiles = Array2D<Tile>(columns: NumColumns, rows: NumRows)
@@ -29,6 +30,9 @@ class Level{
     //which has row 0, col 0, row n, col n empty
     func createInitialTiles() -> Set<Tile>{
         //TODO: change function to initialize tile grid, ie. make sure there's 2 or 4 of each, etc
+        //keeps track of how many of each pokemon have been instantiated
+        var unfilledCoordinates = [(Int, Int)]()
+        
         var set = Set<Tile>()
         
         for row in 0..<NumRows{
@@ -39,22 +43,46 @@ class Level{
                     tiles[col,row] = blankTile
                 }
                 else{
-                    var pkType = PokemonType.random()
+                    unfilledCoordinates.append((col, row))
+                    /*var pkType = PokemonType.random()
+                    
                     
                     let tile = Tile(column:col, row:row, pokemon: pkType)
                     tiles[col, row] = tile
                     //tilesWithSurroundingLayer[col+1, row+1] = tile
                     
-                    set.addElement(tile)
+                    set.addElement(tile)*/
                 }
                 
                 
             }
         }
+        //precondition: unfilledCoordinates.count == NumPokemonTiles * NumberOfPokemonTypes
+        for (var i=0; i<NumberOfPokemonTypes; i++){
+            for (var k=0; k<(NumPokemonTiles/NumberOfPokemonTypes); k++){
+                let randomIndex = Int(arc4random_uniform(UInt32(unfilledCoordinates.count)))
+                var (col, row):(Int, Int)
+                
+                if unfilledCoordinates.count == 1{
+                    (col, row) = unfilledCoordinates[0]
+                }
+                else{
+                    (col, row) = unfilledCoordinates.removeAtIndex(randomIndex)
+                }
+                
+                let pkType = PokemonType(rawValue: i)!
+                let tile = Tile(column:col, row:row, pokemon: pkType)
+                tiles[col, row] = tile
+                
+                set.addElement(tile)
+            }
+            
+        }
+        
         return set
     }
     
-    //function returns true if two tiles can be matched and removed.
+    //function returns true if two tiles can be matched and removed, along with the path
     //also removes those tiles from the tile array before returning
     func tilesAreMatched(t1: Tile, t2: Tile) -> (Bool, Path?){
         println("checking tile \(t1) and tile \(t2)")
@@ -66,7 +94,7 @@ class Level{
             if(matchable(t1, t2)){//don't do search if the tiles are different pokemon
                 var path = doBFS(t1, t2: t2)
                 println(path)
-                println(path.numberOfTurns())
+                println(path.numTurns)
                 
                 var ended = (path.last.column == t2.column) && (path.last.row == t2.row)
                 
@@ -116,12 +144,12 @@ class Level{
             let path = bfsqueue.deQueue()!
             //if the path has too many turns, we don't want it anymore
             //TODO: find more of these "discard" conditions to speed up BFS
-            if(path.numberOfTurns() > 2){
+            if(path.numTurns > 2){
                 continue
             }
             
             let node = path.last
-            if (node.column == t2.column && node.row == t2.row) && path.numberOfTurns() < 3{
+            if (node.column == t2.column && node.row == t2.row) && path.numTurns < 3{
                 return path
             }
             let tile = tiles[node.column, node.row]!
@@ -133,11 +161,10 @@ class Level{
                     println(newpath)
                     bfsqueue.enQueue(newpath)
                     
-                    //TODO: improve efficiency..
                 }
             }
         }
-        return initialpath //should not be reached
+        return initialpath //returns bogus path if t2 is unreachable within 3 turns
     }
     
     
@@ -150,7 +177,7 @@ class Level{
     }
     //returns the movement cost (G) for a path
     private func movementCost(path:Path) -> Int{
-        return path.length + 2*path.numberOfTurns()
+        return path.length + 2*path.numTurns
     }
     
     //returns a list of neighboring tiles

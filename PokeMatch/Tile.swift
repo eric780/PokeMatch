@@ -9,7 +9,7 @@
 import Foundation
 import SpriteKit
 
-let NumberOfPokemonTypes:UInt32 = 15
+let NumberOfPokemonTypes:Int = 15
 
 enum PokemonType:Int{
     //last case must be None, and not included in NumberOfPokemonTypes
@@ -54,7 +54,7 @@ enum PokemonType:Int{
     }
     
     static func random() -> PokemonType{
-        return PokemonType(rawValue:Int(arc4random_uniform(NumberOfPokemonTypes)))!
+        return PokemonType(rawValue:Int(arc4random_uniform(UInt32(NumberOfPokemonTypes))))!
     }
 }
 

@@ -21,8 +21,13 @@ class Node{
 }
 
 struct Path: Printable{
+    //maintains a list of nodes, each node containing column and row coordinates.
+    //maintains the length of the path, updated every time a node is added or removed
+    //maintains number of turns that is recalculated every time a node is added or removed
+    
     var tileSequence: Array<Node>
     var length:Int = 0;
+    var numTurns:Int = 0;
     
     init(){
         tileSequence = Array<Node>()
@@ -36,16 +41,22 @@ struct Path: Printable{
         return s
     }
     
-    mutating func add (column:Int, row:Int){
+    //adds a node to the end of the path
+    mutating func add(column:Int, row:Int){
         var node = Node(column:column, row:row)
         tileSequence += [node]
         length++
+        self.numTurns = numberOfTurns()
     }
     
+    //removes the last node in the path
     mutating func removeLast(){
         tileSequence.removeAtIndex(tileSequence.count-1)
+        length--
+        self.numTurns = numberOfTurns()
     }
     
+    //heuristic-based function that calculates the number of turns IF a node is added
     mutating func potentialNumberOfTurns(column:Int, row:Int) -> Int{
         add(column, row:row)
         let ret = numberOfTurns()
@@ -57,6 +68,7 @@ struct Path: Printable{
         return numberOfTurns() < potentialNumberOfTurns(column, row:row)
     }
     
+    //returns true if the coordinates are in the path, false otherwise
     func containsCoords(column:Int, row:Int) -> Bool{
         for node in tileSequence{
             if (node.column == column) && (node.row == row){
@@ -66,6 +78,7 @@ struct Path: Printable{
         return false
     }
     
+    //returns the number of turns in the path
     func numberOfTurns() -> Int{
         var numTurns = 0
         var horizontal = -1 //1 for horizontal movement, 0 for vertical, -1 for no direction yet
