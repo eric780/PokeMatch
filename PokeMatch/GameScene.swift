@@ -48,6 +48,11 @@ class GameScene: SKScene {
             tile.sprite = sprite
         }
     }
+    func removeAllTileSprites(){
+        for child in tileLayer.children{
+            child.removeFromParent()
+        }
+    }
     
     //converts column,row on the grid into a point on the layer
     func pointForColumn(column:Int, row:Int) -> CGPoint{
@@ -97,7 +102,7 @@ class GameScene: SKScene {
         shapepath.lineWidth = 1.5
         tileLayer.addChild(shapepath)
         
-        delay(1.0){
+        delay(0.8){
             shapepath.removeFromParent()
         }
         
@@ -167,6 +172,11 @@ class GameScene: SKScene {
                                 selectedTiles = (nil, nil)
                                 
                                 drawPath(path!)
+                                
+                                if level.LevelWon{
+                                    println("game won")
+                                    
+                                }
                                 
                             }
                         }

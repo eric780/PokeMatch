@@ -11,7 +11,7 @@ import SpriteKit
 
 let NumberOfPokemonTypes:Int = 15
 
-enum PokemonType:Int{
+enum PokemonType:Int, Printable{
     //last case must be None, and not included in NumberOfPokemonTypes
     
     case Bulbasaur = 0, Squirtle, Charmander, Ditto, Caterpie, Koffing, Abra, Poliwag, Growlithe, Paras, Psyduck, Geodude, Jigglypuff, Grimer, Slowpoke, None
@@ -53,6 +53,10 @@ enum PokemonType:Int{
         }
     }
     
+    var description:String{
+        return self.spriteName
+    }
+    
     static func random() -> PokemonType{
         return PokemonType(rawValue:Int(arc4random_uniform(UInt32(NumberOfPokemonTypes))))!
     }
@@ -86,6 +90,10 @@ class Tile:Printable, Hashable{
     
     func setPokemonTypeToNone(){
         self.pokemon = .None
+    }
+    
+    func setPokemonTypeTo(type:PokemonType){
+        self.pokemon = type
     }
     
 }

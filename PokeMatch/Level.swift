@@ -12,9 +12,10 @@ let NumColumns = 17
 let NumRows = 10
 let NumPokemonTiles:Int = (NumColumns-2)*(NumRows-2)
 
+
 class Level{
     private var tiles = Array2D<Tile>(columns: NumColumns, rows: NumRows)
-    //private var tilesWithSurroundingLayer = Array2D<Tile>(columns: NumColumns+2, rows: NumRows+2)
+    var LevelWon = false
     
     func TileAtPosition(column:Int, row:Int) -> Tile?{
         assert(column >= 0 && column < NumColumns)
@@ -23,7 +24,72 @@ class Level{
     }
     
     func shuffle () -> Set<Tile>{
-        return createInitialTiles()
+        //iterates through tiles, records which ones have pokemon types of None saves to hashmap counter
+        //iterates through tiles again, if tile has type not-non, sets it to a random type from hashmap
+        var set = Set<Tile>()
+        var typeCounts = [PokemonType: Int]()
+        for row in 0..<NumRows{
+            for col in 0..<NumColumns{
+                //get type of tile
+                var pkType = tiles[col, row]!.pokemon
+                
+                //don't count None types
+                if pkType != .None{
+                    //if type not yet encountered, initialize at 1
+                    //otherwise increment the count of that type
+                    var count = typeCounts[pkType]
+                    if count == nil{
+                        typeCounts[pkType] = 1
+                    }
+                    else{
+                        count = count! + 1
+                        typeCounts[pkType] = count
+                    }
+                }
+
+                //end nested for loop
+            }
+        }
+        println(typeCounts)
+        
+        //now iterate again through all tiles
+        for row in 0..<NumRows{
+            for col in 0..<NumColumns{
+                var tile = tiles[col, row]!
+                if tile.pokemon != .None{
+                    //get random key (pokemonType)
+                    var randomIndex = Int(arc4random_uniform(UInt32(typeCounts.count)))
+                    var pkType = Array(typeCounts.keys)[randomIndex]
+                    var newCount = typeCounts[pkType]
+                    
+                    println(typeCounts)
+                    
+                    if(newCount > 0){
+                        //set current tile to randomly chosen pkType
+                        tile.setPokemonTypeTo(pkType)
+                        newCount = newCount!-1
+                        typeCounts[pkType] = newCount
+                    }
+                    else{//we ran out of this type already
+                        //pick another random index
+                        while(newCount <= 0){
+                            randomIndex = Int(arc4random_uniform(UInt32(typeCounts.count)))
+                            pkType = Array(typeCounts.keys)[randomIndex]
+                            newCount = typeCounts[pkType]
+                        }
+                        //same as above, set current tile to pkType
+                        tile.setPokemonTypeTo(pkType)
+                        newCount = newCount! - 1
+                        typeCounts[pkType] = newCount
+                    }
+                    
+                    set.addElement(tile)
+
+                }
+            }
+        }
+        
+        return set
     }
     
     //initialize tiles array, as well as the tiles with surrounding layer,
@@ -44,14 +110,6 @@ class Level{
                 }
                 else{
                     unfilledCoordinates.append((col, row))
-                    /*var pkType = PokemonType.random()
-                    
-                    
-                    let tile = Tile(column:col, row:row, pokemon: pkType)
-                    tiles[col, row] = tile
-                    //tilesWithSurroundingLayer[col+1, row+1] = tile
-                    
-                    set.addElement(tile)*/
                 }
                 
                 
@@ -102,6 +160,9 @@ class Level{
                     //set t1 and t2 to type None
                     t1.setPokemonTypeToNone()
                     t2.setPokemonTypeToNone()
+                    
+                    LevelWon = levelWon()
+                    
                     return (true, path)
                 }
             }
@@ -197,6 +258,17 @@ class Level{
             arr.append(tiles[col, row+1]!)
         }
         return arr
+    }
+    
+    private func levelWon() -> Bool{
+        for row in 0..<NumRows{
+            for col in 0..<NumColumns{
+                if(tiles[col, row]!.pokemon != .None){
+                    return false
+                }
+            }
+        }
+        return true
     }
     
     private func printTileArray(array: Array2D<Tile>){

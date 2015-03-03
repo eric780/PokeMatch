@@ -29,12 +29,19 @@ class GameViewController: UIViewController {
     }
     
     func beginGame(){
+        let newTiles = level.createInitialTiles()
+        scene.addSpritesForTiles(newTiles)
+    }
+    
+    @IBAction func shuffleDidPress(sender: AnyObject) {
         shuffle()
     }
     
+    
     func shuffle(){
-        let newTiles = level.shuffle()
-        scene.addSpritesForTiles(newTiles)
+        let tiles = level.shuffle()
+        scene.removeAllTileSprites()
+        scene.addSpritesForTiles(tiles)
     }
 
     override func shouldAutorotate() -> Bool {
