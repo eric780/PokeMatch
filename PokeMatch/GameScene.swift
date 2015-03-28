@@ -9,8 +9,10 @@
 import SpriteKit
 import UIKit
 
+
 class GameScene: SKScene {
     var level: Level!
+    var winHandler: ((numTiles:Int)->())?
     
     let TileWidth: CGFloat = 34.0
     let TileHeight: CGFloat = 34.0
@@ -41,11 +43,13 @@ class GameScene: SKScene {
     
     func addSpritesForTiles(tiles: Set<Tile>){
         for tile in tiles{
-            let sprite = SKSpriteNode(imageNamed: tile.pokemon.spriteName)
-            sprite.position = pointForColumn(tile.column, row:tile.row)
-            sprite.size = CGSize(width: TileWidth, height: TileHeight)
-            tileLayer.addChild(sprite)
-            tile.sprite = sprite
+            if tile.pokemon != .None{
+                let sprite = SKSpriteNode(imageNamed: tile.pokemon.spriteName)
+                sprite.position = pointForColumn(tile.column, row:tile.row)
+                sprite.size = CGSize(width: TileWidth, height: TileHeight)
+                tileLayer.addChild(sprite)
+                tile.sprite = sprite
+            }
         }
     }
     func removeAllTileSprites(){
@@ -173,11 +177,22 @@ class GameScene: SKScene {
                                 
                                 drawPath(path!)
                                 
-                                if level.LevelWon{
-                                    println("game won")
-                                    
+                                delay(0.5){
+                                    //cascade redraw
+                                    if self.level.gravityDirection != .None{
+                                        self.removeAllTileSprites()
+                                        self.addSpritesForTiles(self.level.tileArrayToSet())
+                                    }
                                 }
                                 
+                                
+                                if let handler = winHandler{
+                                    handler(numTiles: level.remainingTiles())
+                                }
+                                
+                            }
+                            else{
+                                //deselect both tiles?
                             }
                         }
                         

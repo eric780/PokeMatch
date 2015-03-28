@@ -15,7 +15,10 @@ let NumPokemonTiles:Int = (NumColumns-2)*(NumRows-2)
 
 class Level{
     private var tiles = Array2D<Tile>(columns: NumColumns, rows: NumRows)
-    var LevelWon = false
+    private var tileNeighbors = [Tile: [Tile]]()
+    private var numPokemonLeft = NumPokemonTiles
+    let gravityDirection:GravityDirection = .None
+    
     
     func TileAtPosition(column:Int, row:Int) -> Tile?{
         assert(column >= 0 && column < NumColumns)
@@ -50,7 +53,6 @@ class Level{
                 //end nested for loop
             }
         }
-        println(typeCounts)
         
         //now iterate again through all tiles
         for row in 0..<NumRows{
@@ -61,8 +63,6 @@ class Level{
                     var randomIndex = Int(arc4random_uniform(UInt32(typeCounts.count)))
                     var pkType = Array(typeCounts.keys)[randomIndex]
                     var newCount = typeCounts[pkType]
-                    
-                    println(typeCounts)
                     
                     if(newCount > 0){
                         //set current tile to randomly chosen pkType
@@ -161,7 +161,9 @@ class Level{
                     t1.setPokemonTypeToNone()
                     t2.setPokemonTypeToNone()
                     
-                    LevelWon = levelWon()
+                    numPokemonLeft = numPokemonLeft - 2
+                    
+                    cascade(gravityDirection, t1:t1, t2:t2)
                     
                     return (true, path)
                 }
@@ -228,6 +230,117 @@ class Level{
         return initialpath //returns bogus path if t2 is unreachable within 3 turns
     }
     
+    //handles gravity and cascades tiles down a given direction
+    //t1 and t2 are the two tiles removed
+    private func cascade(direction:GravityDirection, t1:Tile, t2:Tile){
+        if direction == .None{
+            return
+        }
+        
+        //determine rows and cols to check
+        var rowsToCheck = [t1.row]
+        var colsToCheck = [t1.column]
+        if t1.row != t2.row{
+            rowsToCheck.append(t2.row)
+        }
+        if t1.column != t2.column{
+            colsToCheck.append(t2.column)
+        }
+        
+        
+        if direction == .Left || direction == .Right{
+            while !rowsToCheck.isEmpty{
+                let rowToCheck = rowsToCheck.removeAtIndex(0)
+                if direction == .Left{
+                    //do a bubble sort to swap the Nones to the end of the row
+                    for col in 1..<NumColumns-1{
+                        if tiles[col, rowToCheck]!.pokemon == .None{
+                            swapTiles(tiles[col+1, rowToCheck]!, t2: tiles[col, rowToCheck]!)
+                        }
+                    }
+                    for col in 1..<NumColumns-1{
+                        if tiles[col, rowToCheck]!.pokemon == .None{
+                            swapTiles(tiles[col+1, rowToCheck]!, t2: tiles[col, rowToCheck]!)
+                        }
+                    }
+                }
+                if direction == .Right{
+                    //do a bubble sort to swap the Nones to the end of the row
+                    for col in reverse(1..<NumColumns-1){
+                        if tiles[col, rowToCheck]!.pokemon == .None{
+                            swapTiles(tiles[col-1, rowToCheck]!, t2: tiles[col, rowToCheck]!)
+                        }
+                    }
+                    for col in reverse(1..<NumColumns-1){
+                        if tiles[col, rowToCheck]!.pokemon == .None{
+                            swapTiles(tiles[col-1, rowToCheck]!, t2: tiles[col, rowToCheck]!)
+                        }
+                    }
+                }
+            }
+            
+        }
+        else{//direction is Up or Down
+            while !colsToCheck.isEmpty{
+                let colToCheck = colsToCheck.removeAtIndex(0)
+                if direction == .Up{
+                    //do a bubble sort to swap the Nones to the end of the col
+                    for row in reverse(1..<NumRows-1){
+                        if tiles[colToCheck, row]!.pokemon == .None{
+                            swapTiles(tiles[colToCheck, row-1]!, t2: tiles[colToCheck, row]!)
+                        }
+                    }
+                    for row in reverse(1..<NumRows-1){
+                        if tiles[colToCheck, row]!.pokemon == .None{
+                            swapTiles(tiles[colToCheck, row-1]!, t2: tiles[colToCheck, row]!)
+                        }
+                    }
+                }
+                if direction == .Down{
+                    //do a bubble sort to swap the Nones to the end of the col
+                    for row in (1..<NumRows-1){
+                        if tiles[colToCheck, row]!.pokemon == .None{
+                            swapTiles(tiles[colToCheck, row+1]!, t2: tiles[colToCheck, row]!)
+                        }
+                    }
+                    for row in (1..<NumRows-1){
+                        if tiles[colToCheck, row]!.pokemon == .None{
+                            swapTiles(tiles[colToCheck, row+1]!, t2: tiles[colToCheck, row]!)
+                        }
+                    }
+                }
+            }
+        }
+
+        
+    }
+    
+    func printRow(row:Int){
+        for col in 0..<NumColumns{
+            println(tiles[col, row])
+        }
+    }
+    
+    func tileArrayToSet() -> Set<Tile>{
+        var s = Set<Tile>()
+        for row in 0..<NumRows{
+            for col in 0..<NumColumns{
+                s.addElement(tiles[col, row]!)
+            }
+        }
+        
+        return s
+    }
+    
+    //swaps t1 and t2 within tiles
+    private func swapTiles(t1:Tile, t2:Tile){
+        let (t1row, t1col) = (t1.row, t1.column)
+        let (t2row, t2col) = (t2.row, t2.column)
+        let tempPokemon = t2.pokemon
+        tiles[t2col, t2row]!.pokemon = tiles[t1col, t1row]!.pokemon
+        tiles[t1col, t1row]!.pokemon = tempPokemon
+    }
+    
     
     //returns the Manhattan distance between two tiles (H)
     private func distance(t1:Tile, t2:Tile) -> Int{
@@ -236,39 +349,34 @@ class Level{
 
         return Int(sqrtf(pow(side1, 2) + pow(side2, 2)))
     }
-    //returns the movement cost (G) for a path
-    private func movementCost(path:Path) -> Int{
-        return path.length + 2*path.numTurns
-    }
     
-    //returns a list of neighboring tiles
+    //returns a list of neighboring tiles (memoized)
     private func getNeighbors(tile: Tile) -> Array<Tile>{
-        let (col,row) = (tile.column, tile.row)
-        var arr = Array<Tile>()
-        if col > 0{
-            arr.append(tiles[col-1, row]!)
+        if let neighbors = tileNeighbors[tile]{
+            return neighbors
         }
-        if row > 0{
-            arr.append(tiles[col, row-1]!)
+        else{
+            let (col,row) = (tile.column, tile.row)
+            var arr = Array<Tile>()
+            if col < NumColumns-1{
+                arr.append(tiles[col+1, row]!)
+            }
+            if col > 0{
+                arr.append(tiles[col-1, row]!)
+            }
+            if row < NumRows-1{
+                arr.append(tiles[col, row+1]!)
+            }
+            if row > 0{
+                arr.append(tiles[col, row-1]!)
+            }
+            tileNeighbors[tile] = arr
+            return arr
         }
-        if col < NumColumns-1{
-            arr.append(tiles[col+1, row]!)
-        }
-        if row < NumRows-1{
-            arr.append(tiles[col, row+1]!)
-        }
-        return arr
     }
     
-    private func levelWon() -> Bool{
-        for row in 0..<NumRows{
-            for col in 0..<NumColumns{
-                if(tiles[col, row]!.pokemon != .None){
-                    return false
-                }
-            }
-        }
-        return true
+    func remainingTiles() -> Int{
+        return numPokemonLeft
     }
     
     private func printTileArray(array: Array2D<Tile>){

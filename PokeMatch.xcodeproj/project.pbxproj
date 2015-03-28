@@ -24,6 +24,7 @@
 		074138441A638980009DD990 /* squirtle.png in Resources */ = {isa = PBXBuildFile; fileRef = 074138411A638980009DD990 /* squirtle.png */; };
 		074244811A7C6DAA00A6C4AC /* Queue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 074244801A7C6DAA00A6C4AC /* Queue.swift */; };
 		075CDF111A89192600173807 /* caterpie.png in Resources */ = {isa = PBXBuildFile; fileRef = 075CDF0F1A89192600173807 /* caterpie.png */; };
+		0762371D1AACF02C00A22739 /* Gravity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0762371C1AACF02C00A22739 /* Gravity.swift */; };
 		07E8F99B1A9429D9001DE920 /* ditto.png in Resources */ = {isa = PBXBuildFile; fileRef = 07E8F99A1A9429D9001DE920 /* ditto.png */; };
 		07E8F99D1A942A1E001DE920 /* koffing.png in Resources */ = {isa = PBXBuildFile; fileRef = 07E8F99C1A942A1E001DE920 /* koffing.png */; };
 		07E8F99F1A942A75001DE920 /* grimer.png in Resources */ = {isa = PBXBuildFile; fileRef = 07E8F99E1A942A75001DE920 /* grimer.png */; };
@@ -70,6 +71,7 @@
 		074244801A7C6DAA00A6C4AC /* Queue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Queue.swift; sourceTree = "<group>"; };
 		074244821A7C71E900A6C4AC /* testingGrounds.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = testingGrounds.playground; sourceTree = "<group>"; };
 		075CDF0F1A89192600173807 /* caterpie.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = caterpie.png; sourceTree = "<group>"; };
+		0762371C1AACF02C00A22739 /* Gravity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Gravity.swift; sourceTree = "<group>"; };
 		07E8F99A1A9429D9001DE920 /* ditto.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ditto.png; sourceTree = "<group>"; };
 		07E8F99C1A942A1E001DE920 /* koffing.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = koffing.png; sourceTree = "<group>"; };
 		07E8F99E1A942A75001DE920 /* grimer.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = grimer.png; sourceTree = "<group>"; };
@@ -129,6 +131,7 @@
 				0741383B1A636FE3009DD990 /* Set.swift */,
 				074244801A7C6DAA00A6C4AC /* Queue.swift */,
 				0741383D1A637038009DD990 /* Level.swift */,
+				0762371C1AACF02C00A22739 /* Gravity.swift */,
 				072D903C1A7A987C00C2848F /* Path.swift */,
 				074138391A636F06009DD990 /* Array2D.swift */,
 				074137DD1A60EC8B009DD990 /* GameViewController.swift */,
@@ -295,6 +298,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0762371D1AACF02C00A22739 /* Gravity.swift in Sources */,
 				074137DC1A60EC8B009DD990 /* GameScene.swift in Sources */,
 				0741383E1A637038009DD990 /* Level.swift in Sources */,
 				072D903D1A7A987C00C2848F /* Path.swift in Sources */,

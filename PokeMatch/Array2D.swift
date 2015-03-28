@@ -26,7 +26,6 @@ struct Array2D<T> {
         set(newValue) {
             array[row*columns + column] = newValue
         }
-    }
-    
+    }    
     
 }
