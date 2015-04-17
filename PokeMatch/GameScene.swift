@@ -11,7 +11,16 @@ import UIKit
 
 
 class GameScene: SKScene {
+/*====================================================================================
+    GameScene handles the "View" portion of MVC. Handles screen touches, displaying tiles, etc. 
+    Contains a reference to the level.
+====================================================================================*/
     var level: Level!
+    
+    /*
+        winHandler is a closure that allows the GameViewController to handle win logic.
+        In the Controller, there is a line that sets this field to a function defined in Controller.
+    */
     var winHandler: ((numTiles:Int)->())?
     
     let TileWidth: CGFloat = 34.0
@@ -20,6 +29,13 @@ class GameScene: SKScene {
     let gameLayer = SKNode()
     let tileLayer = SKNode()
     
+    //Dictates how long a path will appear on the screen
+    let PathDrawDelay:Double = 0.8
+    
+    /*====================================================================================
+        Tuple that holds up to two tiles that are selected by the user.
+        Logic is handled in handleSelectedTile, handleDeselectedTile, twoTilesSelected, and deselectBothTiles.
+    ====================================================================================*/
     var selectedTiles:(Tile?, Tile?) = (nil, nil)
     
     required init?(coder aDecoder: NSCoder) {
@@ -41,6 +57,10 @@ class GameScene: SKScene {
         gameLayer.addChild(tileLayer)
     }
     
+    /*====================================================================================
+        Given a set of tiles, adds sprites for each one on the tileLayer.
+        Also used to redraw the board.
+    ====================================================================================*/
     func addSpritesForTiles(tiles: Set<Tile>){
         for tile in tiles{
             if tile.pokemon != .None{
@@ -52,20 +72,30 @@ class GameScene: SKScene {
             }
         }
     }
+    /*====================================================================================
+        Removes all sprites from the board. Used in redrawing the board.
+    ====================================================================================*/
     func removeAllTileSprites(){
         for child in tileLayer.children{
             child.removeFromParent()
         }
     }
     
-    //converts column,row on the grid into a point on the layer
+    /*====================================================================================
+        Given a column and row in the grid, returns the equivalent CGPoint on the screen. 
+        This is typically the top left corner of a tile.
+    ====================================================================================*/
     func pointForColumn(column:Int, row:Int) -> CGPoint{
         return CGPoint(
             x: CGFloat(column)*TileWidth + TileWidth/2,
             y: CGFloat(row)*TileHeight + TileHeight/2)
     }
     
-    //converts a point on the layer to column,row on the grid
+    /*====================================================================================
+        Given a CGPoint, returns (if possible) a column and row coordinate on the grid.
+        This is the opposite of pointForColumn.
+        Returns a bool indicating whether the conversion was successful, and then the column and row.
+    ====================================================================================*/
     func convertPoint(point: CGPoint) -> (success: Bool, column: Int, row: Int){
         if point.x >= 0 && point.x < CGFloat(NumColumns)*TileWidth &&
             point.y >= 0 && point.y < CGFloat(NumRows)*TileHeight{
@@ -76,23 +106,27 @@ class GameScene: SKScene {
         }
     }
     
-    //returns the skspritenode for a given location inside it
+    /*====================================================================================
+        Given a CGPoint, returns the Sprite that the CGPoint is located within.
+    ====================================================================================*/
     func spriteNodeAtPoint(point: CGPoint) -> SKSpriteNode?{
         for child in tileLayer.children{
             if child.containsPoint(point){
-                return child as SKSpriteNode
+                return child as! SKSpriteNode
             }
         }
         return nil
     }
     
+    /*====================================================================================
+        Draws a Path, then removes it after a certain delay.
+    ====================================================================================*/
     func drawPath(path:Path){
-        //TODO
         var pathpoints = CGPathCreateMutable()
         for (var i=0; i<path.length; i++){
             let node = path.tileSequence[i]
             let point:CGPoint = pointForColumn(node.column, row:node.row)
-            if(i==0){
+            if(i == 0){
                 CGPathMoveToPoint(pathpoints, nil, point.x, point.y)
             }
             else{
@@ -106,13 +140,16 @@ class GameScene: SKScene {
         shapepath.lineWidth = 1.5
         tileLayer.addChild(shapepath)
         
-        delay(0.8){
+        delay(PathDrawDelay){
             shapepath.removeFromParent()
         }
         
     }
     
-    func handleDeselectedTile(tile: Tile) -> Bool{//returns true if tile is deselected
+    /*====================================================================================
+        Handles logic for deselecting a tile. Returns true if a tile was deselected.
+    ====================================================================================*/
+    func handleDeselectedTile(tile: Tile) -> Bool{
         let (selectedOne, selectedTwo) = selectedTiles
         if tile == selectedOne{
             selectedTiles = (nil, selectedTwo)
@@ -125,7 +162,10 @@ class GameScene: SKScene {
         return false
     }
     
-    func handleSelectedTile(tile: Tile) -> Bool{ //returns true if tile is selected
+    /*====================================================================================
+        Handles logic for selecting a tile. Returns true if a tile was selected.
+    ====================================================================================*/
+    func handleSelectedTile(tile: Tile) -> Bool{
         let (selectedOne,selectedTwo) = selectedTiles
         if selectedOne == nil && selectedTwo == nil{
             selectedTiles = (tile, nil)
@@ -145,13 +185,39 @@ class GameScene: SKScene {
 
     }
     
+    /*====================================================================================
+        Returns true if there are two tiles selected.
+    ====================================================================================*/
     func twoTilesSelected() -> Bool{
         let (selectedOne, selectedTwo) = selectedTiles
         return (selectedOne != nil) && (selectedTwo != nil)
     }
     
-    override func touchesBegan(touches: NSSet, withEvent event: UIEvent){
-        let touch = touches.anyObject() as UITouch
+    /*====================================================================================
+        Deselects both tiles. Resets selectedTiles to (nil, nil)
+    ====================================================================================*/
+    func deselectBothTiles(){
+        let (selectedOne,selectedTwo) = selectedTiles
+        
+        //change red shading back to normal
+        if selectedOne != nil{
+            var sprite = spriteNodeAtPoint(pointForColumn(selectedOne!.column, row: selectedOne!.row))
+            sprite!.colorBlendFactor = 0.5
+        }
+        if selectedTwo != nil{
+            var sprite = spriteNodeAtPoint(pointForColumn(selectedTwo!.column, row: selectedTwo!.row))
+            sprite!.colorBlendFactor = 0.5
+        }
+        
+        selectedTiles = (nil, nil)
+        
+    }
+    
+    /*====================================================================================
+        Handles all logic for user touching the screen.
+    ====================================================================================*/
+    override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent){
+        let touch = touches.first as! UITouch
         let location = touch.locationInNode(tileLayer) //touched CGPoint
         let (success, column, row) = convertPoint(location) //converted col,row coordinates from touched point
         if success{//if touch location is within grid
@@ -205,10 +271,10 @@ class GameScene: SKScene {
     }
     
     /*Example Usage:
-    *delay(0.4){
-    *   dosomething()
-    *}
-    *Will delay for 0.4 seconds
+        delay(0.4){
+            dosomething()
+        }
+        Will delay for 0.4 seconds, then call dosomething().
     */
     func delay(delay:Double, closure:()->()) {
         dispatch_after(

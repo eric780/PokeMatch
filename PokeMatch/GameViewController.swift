@@ -15,16 +15,20 @@ class GameViewController: UIViewController {
     var score:Int = 10000
     var timer = NSTimer()
     
+    var difficulty:Difficulty = .Hard
+    
     @IBOutlet weak var numLivesLabel: UILabel!
     @IBOutlet weak var scoreLabel: UILabel!
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        let skView = view as SKView
+        let skView = view as! SKView
         skView.multipleTouchEnabled = false
         scene = GameScene(size: skView.bounds.size)
         
-        level = Level()
+        var gravity:GravityDirection = .Down
+        
+        level = Level(direction:gravity, difficulty:self.difficulty)
         scene.level = level
         
         scene.scaleMode = .AspectFill
@@ -72,6 +76,9 @@ class GameViewController: UIViewController {
     
     func shuffle(){
         var livesRemaining:Int = numLivesLabel.text!.toInt()!
+        
+        scene.deselectBothTiles()
+        
         if livesRemaining > 0{
             let tiles = level.shuffle()
             scene.removeAllTileSprites()

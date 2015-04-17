@@ -9,13 +9,20 @@
 import Foundation
 import SpriteKit
 
-let NumberOfPokemonTypes:Int = 15
+let NumberOfPokemonTypes:Int = 30
 
 enum PokemonType:Int, Printable{
-    //last case must be None, and not included in NumberOfPokemonTypes
+    //last case must be None, and not included in the count of NumberOfPokemonTypes
     
-    case Bulbasaur = 0, Squirtle, Charmander, Ditto, Caterpie, Koffing, Abra, Poliwag, Growlithe, Paras, Psyduck, Geodude, Jigglypuff, Grimer, Slowpoke, None
+    case Bulbasaur = 0, Squirtle, Charmander, Ditto, Caterpie,
+    Koffing, Abra, Poliwag, Growlithe, Paras,
+    Psyduck, Geodude, Jigglypuff, Grimer, Slowpoke,
+    Vulpix, Raichu, Scyther, Gyarados, Weepinbell,
+    Beedrill, Pidgeot, Gengar, Dragonair, Hypno,
+    Vaporeon, Jolteon, Flareon, Machamp, Exeggcute,
+    None
     
+    //Returns the string of a sprite, used to match the sprite to the image name, spriteName.png
     var spriteName:String{
         switch self{
         case .Bulbasaur:
@@ -48,6 +55,36 @@ enum PokemonType:Int, Printable{
             return "grimer"
         case .Slowpoke:
             return "slowpoke"
+        case .Raichu:
+            return "raichu"
+        case .Vulpix:
+            return "vulpix"
+        case .Scyther:
+            return "scyther"
+        case .Gyarados:
+            return "gyarados"
+        case .Weepinbell:
+            return "weepinbell"
+        case .Beedrill:
+            return "beedrill"
+        case .Pidgeot:
+            return "pidgeot"
+        case .Gengar:
+            return "gengar"
+        case .Dragonair:
+            return "dragonair"
+        case .Hypno:
+            return "hypno"
+        case .Vaporeon:
+            return "vaporeon"
+        case .Jolteon:
+            return "jolteon"
+        case .Flareon:
+            return "flareon"
+        case .Machamp:
+            return "machamp"
+        case .Exeggcute:
+            return "exeggcute"
         case .None:
             return "none"
         }
@@ -57,11 +94,19 @@ enum PokemonType:Int, Printable{
         return self.spriteName
     }
     
-    static func random() -> PokemonType{
-        return PokemonType(rawValue:Int(arc4random_uniform(UInt32(NumberOfPokemonTypes))))!
+    //Returns a random Pokemon Type
+    static func random(number:Int) -> PokemonType{
+        return PokemonType(rawValue:Int(arc4random_uniform(UInt32(number))))!
     }
+    
 }
 
+/*====================================================================================
+    Class Tile
+
+Represents a Tile in the game. Since its a class, instances are REFERENCED (not copied)
+as they would be in a Struct.
+====================================================================================*/
 class Tile:Printable, Hashable{
     var column:Int
     var row:Int
@@ -76,8 +121,11 @@ class Tile:Printable, Hashable{
         selected = false
     }
     
+    /*====================================================================================
+        We can hash a Tile based on its position
+    ====================================================================================*/
     var hashValue:Int{
-        return row*10 + column
+        return row*100 + column
     }
     
     var description:String{

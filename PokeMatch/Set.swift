@@ -8,7 +8,13 @@
 
 import Foundation
 
-struct Set<T: Hashable>: SequenceType, Printable {
+/*====================================================================================
+    Standard Set data structure. Uses a dictionary backing.
+
+    DEPRECATED AS OF SWIFT 1.2@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+====================================================================================*/
+
+struct OldSet<T: Hashable>: SequenceType, Printable {
     private var dictionary = Dictionary<T, Bool>()
     
     mutating func addElement(newElement: T) {
@@ -31,8 +37,8 @@ struct Set<T: Hashable>: SequenceType, Printable {
         return dictionary.count
     }
     
-    func unionSet(otherSet: Set<T>) -> Set<T> {
-        var combined = Set<T>()
+    func unionSet(otherSet: OldSet<T>) -> OldSet<T> {
+        var combined = OldSet<T>()
         
         for obj in dictionary.keys {
             combined.dictionary[obj] = true

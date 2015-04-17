@@ -8,6 +8,9 @@
 
 import Foundation
 
+/*====================================================================================
+    Standard Queue data structure. Uses a LinkedList implementation.
+====================================================================================*/
 class QNode<T>{
     var value:T? = nil
     var next:QNode? = nil
@@ -16,7 +19,7 @@ class QNode<T>{
 public class Queue<T>{
     private var top:QNode<T>! = QNode<T>()
     
-    func enQueue(var element:T){
+    func enqueue(var element:T){
         if(top == nil){
             top = QNode()
         }
@@ -38,7 +41,7 @@ public class Queue<T>{
         }
     }
     
-    func deQueue() -> T?{
+    func dequeue() -> T?{
         let topitem:T? = self.top?.value
         if(topitem == nil){
             return nil
